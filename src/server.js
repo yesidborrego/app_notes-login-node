@@ -5,6 +5,7 @@ const exphbs = require('express-handlebars');
 const session = require('express-session');
 const flash = require('connect-flash');
 const methodOverride = require('method-override');
+const passport = require('passport');
 
 // Initialize
 const app = express();
@@ -15,6 +16,7 @@ app.set('port', process.env.PORT || 3000);
 const port = app.get('port');
 require('./config/database');
 const { sessionConfig } = require('./config/keys');
+require('./passport/local-auth');
 
 
 // Settings
@@ -32,6 +34,8 @@ app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(express.urlencoded({extended: false}));
 app.use(session(sessionConfig));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(flash());
 app.use(methodOverride('_method'));
 
@@ -39,12 +43,14 @@ app.use(methodOverride('_method'));
 app.use((req, res, next) => {
   app.locals.successMsg = req.flash('successMsg');
   app.locals.errorMsg = req.flash('errorMsg');
+  app.locals.error = req.flash('error');
+  app.locals.user = req.user; // Global user data
   next();
 });
 
 // Routes
 app.use('/', routes);
-app.use(routesNotes);
+app.use('/', routesNotes);
 app.use('/', routesUsers);
 
 // Server listening

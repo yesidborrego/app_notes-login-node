@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Users = require('../models/Users');
+const passport = require('passport');
 
 // Show the form to "Create" User
 router.get('/users/signup', (req, res) => {
@@ -41,8 +42,23 @@ router.post('/users/save-user', async (req, res) => {
 
 });
 
+// Show form to Login
 router.get('/users/login', (req, res) => {
   res.render('users/login-user');
+});
+
+// Verify if the email exist.
+router.post('/users/login', passport.authenticate('local-login', {
+  successRedirect: '/notes',
+  failureRedirect: '/users/login',
+  failureFlash: true
+})
+);
+
+// User Logout
+router.get('/users/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
 });
 
 module.exports = router;
